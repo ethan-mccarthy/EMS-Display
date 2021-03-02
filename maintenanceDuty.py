@@ -67,6 +67,7 @@ def getMaintenanceData(verbose=True):
     elif shift == "DW":
         yesterday = datetime.today() - timedelta(days=1)
         if yesterday.month != today.month:
+            yesterdayNumeric = yesterday.strftime("%-m/%-d") # dd/mm/YY
             ## Get the previous day's maintenance spreadsheet
             # Define which tab of the spreadsheet we want to retrieve
             SPREADSHEET_TAB_NAME = yesterday.strftime("%B") ## Gets the tab of the current month
@@ -75,7 +76,7 @@ def getMaintenanceData(verbose=True):
             SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
             # Google Sheet ID (from the sharable URL)
-            SPREADSHEET_ID = '1drj0USNBd01L1Nr6lqRnx2vEsH8hei6sEASFitYE0fY'
+            SPREADSHEET_ID = 'PLACE YOUR SPREADSHEET ID HERE'
 
             # Gets the data from the Google Sheet and stores it in the variable "Data"
             maintenanceRawData_yester = pull_sheet_data(SCOPES, SPREADSHEET_ID, SPREADSHEET_TAB_NAME, verbose)
@@ -83,7 +84,7 @@ def getMaintenanceData(verbose=True):
             # Convert the retrieved raw "Data" to a data frame that can be more easily worked with
             maintenanceDF_yester = pd.DataFrame(maintenanceRawData_yester[1:], columns=maintenanceRawData_yester[0])
 
-            prevShiftData = maintenanceDF_yester.loc[maintenanceDF_yester['DATE'] == dateNumeric]
+            prevShiftData = maintenanceDF_yester.loc[maintenanceDF_yester['DATE'] == yesterdayNumeric]
 
             prevShiftMaintenance = prevShiftData.iloc[0]["EM" + ' MAINTENANCE DUTY']
             data.append(["EM", prevShiftMaintenance, "", ""])
