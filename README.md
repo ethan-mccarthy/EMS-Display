@@ -20,7 +20,7 @@ git clone http://github.com/ethan-mccarthy/EMS-Display
 
 Information about getting started with the Waveshare e-ink display may be found [here](https://www.waveshare.com/wiki/7.5inch_e-Paper_HAT).
 
-## Note
+## Additional Software
 
 Additional software must be installed for the program to work properly! You should also follow the instructions to install the Waveshare EPD package (available [here](https://www.waveshare.com/wiki/7.5inch_e-Paper_HAT)).
 
