@@ -22,13 +22,13 @@ from PIL import Image,ImageDraw,ImageFont
 import traceback
 
 try:
-    tokens_pool = ['PLACE YOUR BITLY API TOKEN HERE']
+    tokens_pool = ['e394c3554912465ce1bea88a56b1d899c0fb6beb']
     shortener = bitlyshortener.Shortener(tokens=tokens_pool, max_cache_size=256)
 
     print("UCLA EMS Display")
     epd = epd7in5_V2.EPD()
     
-    print("Clearing display")
+    print("Initializing the display")
     epd.init()
 
     font24 = ImageFont.truetype(os.path.join(picdir, 'arial.ttf'), 24)
@@ -43,10 +43,9 @@ try:
     font14 = ImageFont.truetype(os.path.join(picdir, 'arial.ttf'), 14)
 
     print("Getting maintenance data...")
-    maintenanceData = getMaintenanceData(verbose = False)
+    maintenanceData = getMaintenanceData(verbose = True)
 
     # Drawing on the Horizontal image
-    print("Drawing startup screen")
     window = Image.new('1', (epd.width, epd.height), 255)  # 255: clear the frame
     draw = ImageDraw.Draw(window)
     draw.text((10, 10), todaysDate(), font = font24bolditalic, fill = 0)
@@ -304,7 +303,6 @@ try:
                 window.paste(usaoutline, ((holidayTextLength[0] + 93), 90))
             elif(maintenanceData.iloc[0]['Holiday'] == "Thanksgiving"):
                 leaves = Image.open(os.path.join(picdir, 'leaves.png'))
-                #usaoutline = Image.open(os.path.join(picdir, 'usaoutline.png'))
                 window.paste(leaves, (10, 90))
                 window.paste(leaves, (34, 90))
                 holidayText = "Happy " + maintenanceData.iloc[0]['Holiday'] + "! "
@@ -467,7 +465,7 @@ try:
                 holidayTextLength = draw.textsize(holidayText, font = font18bold)
 
                 window.paste(vote, ((holidayTextLength[0] + 69), 90))
-                window.paste(usaflag, ((holidayTextLength[0] + 93), 94))
+                #window.paste(usaflag, ((holidayTextLength[0] + 93), 94))
             else:
                 partyBackward = Image.open(os.path.join(picdir, '003-partyBackward.png'))
                 partyForward = Image.open(os.path.join(picdir, '003-partyForward.png'))
@@ -485,24 +483,44 @@ try:
     draw.rectangle([(0,204), (40,239)], fill=0)
     draw.line([(40,169),(40,204)], fill = 0)
 
-    prevShift = maintenanceData.iloc[1]['Shift']
+    shift = ""
+    prevShift = ""
+    prevShiftMaint = ""
+    currentShiftMaint = ""
+
+    today = datetime.now()
+
+    if today.hour >= 7 and today.hour < 15:
+        shift = "DW"
+        prevShift = "EM"
+        currentShiftMaint = maintenanceData.loc[maintenanceData['Shift'] == shift, ['MaintenanceDuty']].values[0]
+        print(currentShiftMaint[0])
+
+        prevShiftMaint = maintenanceData.loc[maintenanceData['Shift'] == "EM", ['MaintenanceDuty']].values[0]
+        print(prevShiftMaint[0])
+    elif today.hour >= 15 or today.hour < 7:
+        shift = "EM"
+        prevShift = "DW"
+        currentShiftMaint = maintenanceData.loc[maintenanceData['Shift'] == shift, ['MaintenanceDuty']].values[0]
+        print(currentShiftMaint[0])
+
+        prevShiftMaint = maintenanceData.loc[maintenanceData['Shift'] == "DW", ['MaintenanceDuty']].values[0]
+        print(prevShiftMaint[0])
+
+    draw.text((50, 180), prevShiftMaint[0], font = font14, fill=0)
+    draw.text((50, 215), currentShiftMaint[0], font = font14, fill=0)
+    print(maintenanceData)
+
     if prevShift == "EM":
         draw.text((7, 177), prevShift, font = font18bold, fill=0)
     else:
         draw.text((5, 177), prevShift, font = font18bold, fill=0)
-    currentShift = maintenanceData.iloc[0]['Shift']
-    if currentShift == "EM":
-        draw.text((7, 212), currentShift, font = font18bold, fill=1)
+    if shift == "EM":
+        draw.text((7, 212), shift, font = font18bold, fill=1)
     else:
-        draw.text((5, 212), currentShift, font = font18bold, fill=1)
+        draw.text((5, 212), shift, font = font18bold, fill=1)
     draw.rectangle([(0,169), (350, 239)], outline=0)
     draw.line([(0,204),(350,204)], fill = 0)
-
-    prevShiftMaint = maintenanceData.iloc[1]['MaintenanceDuty']
-    draw.text((50, 180), prevShiftMaint, font = font14, fill=0)
-    currentShiftMaint = maintenanceData.iloc[0]['MaintenanceDuty']
-    draw.text((50, 215), currentShiftMaint, font = font14, fill=0)
-    print(maintenanceData)
 
 
     draw.rectangle([(0,273), (140, 306)], outline=0)
@@ -511,7 +529,7 @@ try:
     
     print("Getting shift data...")
     # Set n = to the number of shifts you want to retrieve (from the current shift, inclusive)
-    shiftData = getShiftData(n=4, verbose=False)
+    shiftData = getShiftData(n=4, verbose = True)
     print(shiftData)
     draw.rectangle([(0,306), (615,340)], fill=0)
     draw.text((10, 314), 'DATE', font = font18bold, fill=1)
@@ -749,14 +767,6 @@ try:
         
     epd.Dev_exit()
 
-# except Exception as e:
-#     print("####ERROR####\n" + traceback.format_exc())
-#     draw.rectangle([(160,254), (750, 290)], fill=0)
-#     draw.text((170, 260), 'AN ERROR OCCURRED - Assume data unreliable', font = font24bold, fill = 1)
-#     epd.display(epd.getbuffer(window))
-#     time.sleep(2)
-#     epd.Dev_exit()
-
 except Exception as e:
     print("####ERROR####\n" + traceback.format_exc())
     errorWindow = Image.new('1', (epd.width, epd.height), 255)  # 255: clear the frame
@@ -774,11 +784,6 @@ except Exception as e:
     time.sleep(2)
     epd.Dev_exit()
 
-    
-# except KeyboardInterrupt:    
-#     logging.info("ctrl + c:")
-#     epd7in5_V2.epdconfig.module_exit()
-#     exit()
 
 
 
