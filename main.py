@@ -22,7 +22,7 @@ from PIL import Image,ImageDraw,ImageFont
 import traceback
 
 try:
-    tokens_pool = ['e394c3554912465ce1bea88a56b1d899c0fb6beb']
+    tokens_pool = ['API KEY HERE']
     shortener = bitlyshortener.Shortener(tokens=tokens_pool, max_cache_size=256)
 
     print("UCLA EMS Display")
