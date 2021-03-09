@@ -13,7 +13,7 @@ def getMaintenanceData(verbose=True):
     SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
 
     # Google Sheet ID (from the sharable URL)
-    SPREADSHEET_ID = '1drj0USNBd01L1Nr6lqRnx2vEsH8hei6sEASFitYE0fY'
+    SPREADSHEET_ID = 'YOUR SPREADSHEET ID HERE'
 
     # Define which tab of the spreadsheet we want to retrieve
     SPREADSHEET_TAB_NAME = today.strftime("%B") ## Gets the tab of the current month
